@@ -1,0 +1,42 @@
+html {
+	box-sizing: border-box;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+}
+
+html, body {
+	width: 100%;
+	height: 100%;
+
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+
+body {
+	overflow: hidden;
+	background-color: #000;
+}
+
+/* ////////// */
+
+.app-container {
+	/* width and height set in JS */
+
+	margin: 0;
+	border: 0;
+	padding: 0;
+}
+
+.app-canvas {
+	width: 100%;
+	height: 100%;
+
+	margin: 0;
+	border: 0;
+	padding: 0;
+
+	background-color: #61ad4a;
+}
