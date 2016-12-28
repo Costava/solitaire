@@ -1,5 +1,5 @@
 # Solitaire
 
-[Play online](https://github.com/Costava/solitaire/dist)
+[Play online](https://costava.github.io/solitaire/dist/)
 
 ![Solitaire](http://i.imgur.com/AjhuPOi.png)
