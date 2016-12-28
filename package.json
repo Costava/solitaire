@@ -1,0 +1,27 @@
+{
+  "name": "solitaire",
+  "version": "0.0.2",
+  "description": "Play solitaire.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "update-images": "node encode-images.js",
+    "prep-dev": "node build-css.js & node build-js.js",
+    "prep-production": "node build-css.js -p & node build-js.js -p",
+    "clear-prep": "node clear-prep.js",
+    "build-dev": "npm run prep-dev && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.css --js ./prep/bundle.js",
+    "build-production": "npm run prep-production && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.min.css --js ./prep/bundle.min.js && node minify-dist.js",
+    "webpack": "webpack ./src/scripts/main.js ./prep/bundle.js"
+  },
+  "devDependencies": {
+    "babel-core": "6.21.0",
+    "babel-loader": "6.2.10",
+    "babel-preset-es2015": "6.18.0",
+    "cssnano": "3.9.1",
+    "datauri": "1.0.5",
+    "fs-extra": "1.0.0",
+    "html-minifier": "3.2.3",
+    "postcss": "5.2.8",
+    "postcss-advanced-variables": "1.2.2",
+    "webpack": "1.14.0"
+  }
+}
