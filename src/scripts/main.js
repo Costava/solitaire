@@ -215,7 +215,7 @@ new ImageLoader(ImageURIs, function(images) {
 					action: function() {
 						console.log("See source");
 
-						window.open('https://github.com/Costava', '_blank');
+						window.open('https://github.com/Costava/solitaire', '_blank');
 					}
 				},
 				{
