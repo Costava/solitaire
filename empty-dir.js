@@ -1,3 +1,8 @@
+/**
+ * Empties the target directory
+ * Usage: node empty-dir.js path/to/folder
+ */
+
 var fse = require('fs-extra');
 
 var target = process.argv[2];
