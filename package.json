@@ -7,7 +7,7 @@
     "update-images": "node encode-images.js",
     "prep-dev": "node build-css.js & node build-js.js",
     "prep-production": "node build-css.js -p & node build-js.js -p",
-    "clear-prep": "node clear-prep.js",
+    "empty-prep": "node empty-dir.js ./prep",
     "build-dev": "npm run prep-dev && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.css --js ./prep/bundle.js",
     "build-production": "npm run prep-production && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.min.css --js ./prep/bundle.min.js && node minify-dist.js",
     "webpack": "webpack ./src/scripts/main.js ./prep/bundle.js"
