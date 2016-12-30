@@ -1,5 +1,7 @@
 /**
- * Pass -p option to this script to produce minified css instead
+ * Pass -p option to this script to produce minified CSS instead
+ * Usage: node build-css.js
+ *        node build-css.js -p
  */
 
 const fs = require('fs');
@@ -39,7 +41,7 @@ function handleCSS(outputLocation, plugins) {
 			fs.writeFile(outputLocation, result.css, function(err) {
 				if (err) reject(err);
 
-				console.log("CSS built");
+				console.log(`Built ${inputFile} and outputted to ${outputLocation}`);
 
 				resolve();
 			});

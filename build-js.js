@@ -1,5 +1,7 @@
 /**
  * Pass -p option to this script to produce minified bundle instead
+ * Usage: node build-js.js
+ *        node build-js.js -p
  */
 
 var webpack = require('webpack');
@@ -59,7 +61,7 @@ function handleJS(entry, output, plugins) {
 			console.log(err);
 		}
 		else {
-			console.log("JS built");
+			console.log(`Bundled ${entry} and outputted to ${output.filename} in ${output.path}`);
 		}
 	});
 }
