@@ -10,6 +10,7 @@
     "empty-prep": "node empty-dir.js ./prep",
     "build-dev": "npm run prep-dev && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.css --js ./prep/bundle.js",
     "build-production": "npm run prep-production && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.min.css --js ./prep/bundle.min.js && node minify-dist.js",
+    "start-server": "node server.js",
     "webpack": "webpack ./src/scripts/main.js ./prep/bundle.js"
   },
   "devDependencies": {
