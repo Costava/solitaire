@@ -1,6 +1,6 @@
 /**
  * Embed CSS and JS in an HTML file
- * HTML file paths must be first arguments
+ * HTML file path must be first argument. Output file is second.
  * Specifying CSS and JS is optional and either can be specified first
  * Usage:
  * node embed.js index.html output.html --css style.css style2.css --js script.js script2.js
@@ -65,7 +65,7 @@ if (cssOptionIndex != -1) {
 	for (var i = 0; i < cssFilePaths.length; i += 1) {
 		var current = cssFilePaths[i];
 
-		console.log(`Embedding ${current}`);
+		console.log(`Embedding ${current} in ${inputHTMLFilePath}`);
 
 		var css = fs.readFileSync(current, {encoding: 'utf-8'});
 
@@ -107,7 +107,7 @@ if (jsOptionIndex != -1) {
 	for (var i = 0; i < jsFilePaths.length; i += 1) {
 		var current = jsFilePaths[i];
 
-		console.log(`Embedding ${current}`);
+		console.log(`Embedding ${current} in ${inputHTMLFilePath}`);
 
 		var js = fs.readFileSync(current, {encoding: 'utf-8'});
 
