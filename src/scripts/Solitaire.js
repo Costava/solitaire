@@ -3,10 +3,10 @@ import DualLooper from './DualLooper';
 import ListenerSystem from './ListenerSystem';
 import Layouter from './Layouter';
 import setPointer from './setPointer';
+import setImageSmoothing from './setImageSmoothing';
 import getMousePos from './getMousePos';
 import getTouchPos from './getTouchPos';
 import getRelativePos from './getRelativePos';
-import setImageSmoothing from './setImageSmoothing';
 import objHovered from './objHovered';
 
 /**
@@ -43,6 +43,8 @@ function Solitaire(o) {
 	this.running = false;
 	this.armed = false;
 
+	//////////
+
 	this.labelMargin = 0.01;
 	this.fontHeight = 0.04;
 
@@ -51,32 +53,17 @@ function Solitaire(o) {
 	this.horizSpace = 0.036;// Between piles
 
 	this.facedownSpacing = 0.02;
-	this.faceupSpacing = this.labelMargin + this.fontHeight;
+	this.faceupSpacing = this.getFaceupSpacing();
 
-	this.pilesY = 0 + this.cardHeight + 2 * this.horizSpace;
+	this.pilesY = this.getPilesY();
 
-	this.horizMargin = (1 * (this.aspectWidth / this.aspectHeight) - 7 * this.cardWidth - 6 * this.horizSpace) / 2;
+	this.horizMargin = this.getHorizMargin();
 
-	this.turnPilePos = {
-		x: this.horizMargin,
-		y: this.horizSpace,
-		width: this.cardWidth,
-		height: this.cardHeight
-	};
+	this.turnPilePos = this.getTurnPilePos();
+	this.turnedPilePos = this.getTurnedPilePos();
+	this.buttonsPos = this.getButtonsPos();
 
-	this.turnedPilePos = {
-		x: this.horizMargin + this.cardWidth + this.horizSpace,
-		y: this.horizSpace,
-		width: this.cardWidth,
-		height: this.cardHeight
-	};
-
-	this.buttonsPos = {
-		x: this.turnedPilePos.x + this.cardWidth + this.horizSpace,
-		y: this.turnedPilePos.y,
-		width: this.cardWidth,
-		height: this.cardHeight
-	};
+	this.foundationsPos = this.getFoundationsPos();
 
 	//////////
 
@@ -166,11 +153,101 @@ function Solitaire(o) {
 			]
 		}
 	);
+}// End of constructor
 
-	//////////
+Solitaire.NUM_FOUNDATIONS = 4;
+Solitaire.NUM_PILES = 7;
 
-	this.newGame();
-}
+//////////
+
+/**
+ * @returns {number}
+ */
+Solitaire.prototype.getFaceupSpacing = function() {
+	return this.labelMargin + this.fontHeight;
+};
+
+/**
+ * @returns {number}
+ */
+Solitaire.prototype.getPilesY = function() {
+	return this.cardHeight + 2 * this.horizSpace;
+};
+
+/**
+ * @returns {number}
+ */
+Solitaire.prototype.getHorizMargin = function() {
+	return (1 * (this.aspectWidth / this.aspectHeight) - 7 * this.cardWidth - 6 * this.horizSpace) / 2;
+};
+
+/**
+ * @returns {object}
+ */
+Solitaire.prototype.getTurnPilePos = function() {
+	return {
+		x: this.horizMargin,
+		y: this.horizSpace,
+		width: this.cardWidth,
+		height: this.cardHeight
+	};
+};
+
+/**
+ * @returns {object}
+ */
+Solitaire.prototype.getTurnedPilePos = function() {
+	return {
+		x: this.horizMargin + this.cardWidth + this.horizSpace,
+		y: this.horizSpace,
+		width: this.cardWidth,
+		height: this.cardHeight
+	};
+};
+
+/**
+ * @returns {object}
+ */
+Solitaire.prototype.getButtonsPos = function() {
+	return {
+		x: this.horizMargin + 2 * this.cardWidth + 2 * this.horizSpace,
+		y: this.turnedPilePos.y,
+		width: this.cardWidth,
+		height: this.cardHeight
+	};
+};
+
+/**
+ * Get positions of foundations
+ * @returns {object[]}
+ */
+Solitaire.prototype.getFoundationsPos = function() {
+	var pos = [];
+
+	var y = this.horizSpace;
+
+	for (var f = 0; f < Solitaire.NUM_FOUNDATIONS; f += 1) {
+		var x = (this.aspectWidth / this.aspectHeight) - this.horizMargin;
+
+		x -= (Solitaire.NUM_FOUNDATIONS - f) * this.cardWidth;
+		x -= (Solitaire.NUM_FOUNDATIONS - f - 1) * this.horizSpace;
+
+		pos.push({
+			x: x,
+			y: y,
+			width: this.cardWidth,
+			height: this.cardHeight,
+
+			foundation: f,
+			isFoundationBase: true
+		});
+	}
+
+	// 0 index is farthest left
+	return pos;
+};
+
+//////////
 
 Solitaire.prototype.newGame = function() {
 	console.log("New game. Seed:", this.srng.seed);
@@ -180,7 +257,6 @@ Solitaire.prototype.newGame = function() {
 	this.hoverPos = null;
 
 	this.foundations = [[], [], [], []];
-	this.foundationPos = this.getFoundationPos();// Needs .horizMargin defined
 
 	var deck = this.getShuffledDeck();
 
@@ -194,17 +270,6 @@ Solitaire.prototype.newGame = function() {
 
 	this.updatePileCardPositions();
 };
-
-// /**
-//  * @returns {string}
-//  */
-// Solitaire.prototype.randomColor = function() {
-// 	var r = this.srng.randomInt(0, 255);
-// 	var g = this.srng.randomInt(0, 255);
-// 	var b = this.srng.randomInt(0, 255);
-//
-// 	return `rgb(${r}, ${g}, ${b})`;
-// };
 
 Solitaire.prototype.start = function() {
 	if (!this.running) {
@@ -775,7 +840,7 @@ Solitaire.prototype.getHoverPos = function(mousePos) {
 		var topCard;
 
 		if (foundation.length == 0) {
-			topCard = this.foundationPos[f];
+			topCard = this.foundationsPos[f];
 		}
 		else {
 			topCard = foundation[foundation.length - 1];
@@ -881,40 +946,12 @@ Solitaire.prototype.drawPiles = function() {
 	}
 };
 
-/**
- * Get positions of foundations
- * @returns {object[]}
- */
-Solitaire.prototype.getFoundationPos = function() {
-	var pos = [];
-
-	for (var f = 0; f < this.foundations.length; f += 1) {
-		var y = this.horizSpace;
-		var x = (this.aspectWidth / this.aspectHeight) - this.horizMargin;
-
-		x -= (f + 1) * this.cardWidth;
-		x -= f * this.horizSpace;
-
-		pos.push({
-			x: x,
-			y: y,
-			width: this.cardWidth,
-			height: this.cardHeight,
-
-			foundation: f,
-			isFoundationBase: true
-		});
-	}
-
-	return pos;
-};
-
 Solitaire.prototype.drawFoundations = function() {
 	for (var f = 0; f < this.foundations.length; f += 1) {
 		var foundation = this.foundations[f];
 
 		if (foundation.length == 0) {
-			var pos = this.foundationPos[f];
+			var pos = this.foundationsPos[f];
 
 			this.ctx.save();
 

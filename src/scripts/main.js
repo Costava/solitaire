@@ -137,6 +137,8 @@ new ImageLoader(ImageURIs, function(images) {
 								}
 							});
 
+							game.newGame();
+
 							ctx.clearRect(0, 0, can.width, can.height);
 
 							game.start();
