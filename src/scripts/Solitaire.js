@@ -3,6 +3,8 @@ import DualLooper from './DualLooper';
 import ListenerSystem from './ListenerSystem';
 import Layouter from './Layouter';
 import setPointer from './setPointer';
+import getMousePos from './getMousePos';
+import getTouchPos from './getTouchPos';
 import getRelativePos from './getRelativePos';
 import setImageSmoothing from './setImageSmoothing';
 import objHovered from './objHovered';
@@ -36,6 +38,8 @@ function Solitaire(o) {
 
 	//////////
 
+	this.oldPos = null;
+
 	this.running = false;
 	this.armed = false;
 
@@ -67,6 +71,13 @@ function Solitaire(o) {
 		height: this.cardHeight
 	};
 
+	this.buttonsPos = {
+		x: this.turnedPilePos.x + this.cardWidth + this.horizSpace,
+		y: this.turnedPilePos.y,
+		width: this.cardWidth,
+		height: this.cardHeight
+	};
+
 	//////////
 
 	this.mousemoveLS = new ListenerSystem(
@@ -85,6 +96,26 @@ function Solitaire(o) {
 		window,
 		'mouseup',
 		Solitaire.handleMouseup.bind(this)
+	);
+
+	////////// Same for touch in addition to mouse
+
+	this.touchmoveLS = new ListenerSystem(
+		window,
+		'touchmove',
+		Solitaire.handleTouchmove.bind(this)
+	);
+
+	this.touchstartLS = new ListenerSystem(
+		window,
+		'touchstart',
+		Solitaire.handleTouchstart.bind(this)
+	);
+
+	this.touchendLS = new ListenerSystem(
+		window,
+		'touchend',
+		Solitaire.handleTouchend.bind(this)
 	);
 
 	//////////
@@ -237,6 +268,10 @@ Solitaire.prototype.arm = function() {
 		this.mousedownLS.start();
 		this.mouseupLS.start();
 
+		this.touchmoveLS.start();
+		this.touchstartLS.start();
+		this.touchendLS.start();
+
 		this.armed = true;
 	}
 };
@@ -246,6 +281,10 @@ Solitaire.prototype.disarm = function() {
 		this.mousemoveLS.stop();
 		this.mousedownLS.stop();
 		this.mouseupLS.stop();
+
+		this.touchmoveLS.stop();
+		this.touchstartLS.stop();
+		this.touchendLS.stop();
 
 		this.armed = false;
 	}
@@ -268,8 +307,40 @@ Solitaire.moveCard = function(card, x, y) {
 /**
  * @param {Event} e
  */
+Solitaire.handleTouchmove = function(e) {
+	e.preventDefault();
+
+	var pos = getTouchPos(e);
+
+	if (this.oldPos == null) {
+		e.movementX = 0;
+		e.movementY = 0;
+	}
+	else {
+		e.movementX = pos.x - this.oldPos.x;
+		e.movementY = pos.y - this.oldPos.y;
+
+		// console.log(e.movementX);
+	}
+
+	this.oldPos = pos;
+
+	this.handleMove(e, pos);
+};
+
+/**
+ * @param {Event} e
+ */
 Solitaire.handleMousemove = function(e) {
-	var mousePos = getRelativePos(e, this.ctx.canvas);
+	// console.log("handleMousemove");
+
+	var pos = getMousePos(e);
+
+	this.handleMove(e, pos);
+};
+
+Solitaire.prototype.handleMove = function(e, pos) {
+	var mousePos = getRelativePos(pos, this.ctx.canvas);
 
 	if (this.heldCard == null && (this.turnPile.length > 0 || this.turnedPile.length > 0)) {
 		var topTurnPileCard = this.turnPilePos;
@@ -305,8 +376,50 @@ Solitaire.handleMousemove = function(e) {
 /**
  * @param {Event} e
  */
+Solitaire.handleTouchstart = function(e) {
+	e.preventDefault();
+
+	// console.log("handleTouchstart");
+
+	var pos = getTouchPos(e);
+	var relPos = getRelativePos(pos, this.ctx.canvas);
+
+	this.oldPos = pos;
+
+	// console.log("this.buttonsPos:", this.buttonsPos);
+	// console.log("relPos:", relPos);
+
+	if (objHovered(this.buttonsPos, relPos)) {
+		// console.log("menu");
+
+		// e.pageX = pos.x;
+		// e.pageY = pos.y;
+
+		Layouter.handleMousedown.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
+	}
+	else {
+		// console.log("not menu");
+
+		this.handleDown(pos);
+	}
+
+	// this.handleDown(pos);
+};
+
+/**
+ * @param {Event} e
+ */
 Solitaire.handleMousedown = function(e) {
-	var mousePos = getRelativePos(e, this.ctx.canvas);
+	var pos = getMousePos(e);
+
+	this.handleDown(pos);
+};
+
+/**
+ * @param {Event} e
+ */
+Solitaire.prototype.handleDown = function(pos) {
+	var mousePos = getRelativePos(pos, this.ctx.canvas);
 
 	if (this.turnPile.length > 0 || this.turnedPile.length > 0) {
 		var topTurnPileCard = this.turnPile[this.turnPile.length - 1] || this.turnPilePos;
@@ -369,8 +482,38 @@ Solitaire.handleMousedown = function(e) {
 /**
  * @param {Event} e
  */
+Solitaire.handleTouchend = function(e) {
+	e.preventDefault();
+
+	var pos = getTouchPos(e);
+	var relPos = getRelativePos(pos, this.ctx.canvas);
+
+	this.oldPos = pos;
+
+	if (objHovered(this.buttonsPos, relPos)) {
+		Layouter.handleMouseup.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
+	}
+	else {
+		this.handleUp(pos);
+	}
+};
+
+/**
+ * @param {Event} e
+ */
 Solitaire.handleMouseup = function(e) {
-	var mousePos = getRelativePos(e, this.ctx.canvas);
+	var pos = getMousePos(e);
+
+	this.handleUp(pos);
+};
+
+/**
+ * @param {Event} e
+ */
+Solitaire.prototype.handleUp = function(pos) {
+	// console.log("handleMouseup");
+
+	var mousePos = getRelativePos(pos, this.ctx.canvas);
 
 	if (this.heldCard == null && (this.turnPile.length > 0 || this.turnedPile.length > 0)) {
 		var topTurnPileCard = this.turnPile[this.turnPile.length - 1] || this.turnPilePos;
