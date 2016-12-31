@@ -65,6 +65,8 @@ function Solitaire(o) {
 
 	this.foundationsPos = this.getFoundationsPos();
 
+	this.pileBasePos = this.getPileBasePos();
+
 	//////////
 
 	this.mousemoveLS = new ListenerSystem(
@@ -155,6 +157,9 @@ function Solitaire(o) {
 	);
 }// End of constructor
 
+Solitaire.RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+Solitaire.SUITS = ["clubs", "diamonds", "spades", "hearts"];
+
 Solitaire.NUM_FOUNDATIONS = 4;
 Solitaire.NUM_PILES = 7;
 
@@ -239,8 +244,35 @@ Solitaire.prototype.getFoundationsPos = function() {
 			height: this.cardHeight,
 
 			foundation: f,
-			isFoundationBase: true
+			type: "FOUNDATION",
+			location: null
 		});
+	}
+
+	// 0 index is farthest left
+	return pos;
+};
+
+/**
+ * @returns {object[]}
+ */
+Solitaire.prototype.getPileBasePos = function() {
+	var pos = [];
+
+	for (var p = 0; p < Solitaire.NUM_PILES; p += 1) {
+		var base = {};
+
+		base.y = this.pilesY;
+		base.x = this.horizMargin + p * (this.cardWidth + this.horizSpace);
+
+		base.width = this.cardWidth;
+		base.height = this.cardHeight;
+
+		base.pile = p;
+		base.type = 'PILE';
+		base.location = null;
+
+		pos.push(base);
 	}
 
 	// 0 index is farthest left
@@ -261,7 +293,6 @@ Solitaire.prototype.newGame = function() {
 	var deck = this.getShuffledDeck();
 
 	this.piles = Solitaire.getNewPiles(deck);
-	this.pileBasePos = this.getPileBasePos();
 
 	this.turnPile = deck;
 	this.turnedPile = [];// The pile of cards taken off turnPile
@@ -290,6 +321,9 @@ Solitaire.prototype.start = function() {
 
 				this.drawPiles();
 				this.drawFoundations();
+
+				this.buttonsMenu.draw(this.ctx);
+
 				this.drawHoverPos();
 
 				this.drawHeldCards();
@@ -298,7 +332,7 @@ Solitaire.prototype.start = function() {
 
 		this.dualLooper.start();
 
-		this.buttonsMenu.start(this.ctx);
+		// this.buttonsMenu.start(this.ctx);
 
 		this.running = true;
 	}
@@ -315,7 +349,7 @@ Solitaire.prototype.stop = function(work) {
 
 		this.stopWork = work;
 
-		this.buttonsMenu.stop(function() {
+		// this.buttonsMenu.stop(function() {
 			this.dualLooper.stopCallback = function() {
 				this.running = false;
 
@@ -323,7 +357,7 @@ Solitaire.prototype.stop = function(work) {
 			}.bind(this);
 
 			this.dualLooper.stop();
-		}.bind(this));
+		// }.bind(this));
 	}
 };
 
@@ -355,6 +389,8 @@ Solitaire.prototype.disarm = function() {
 	}
 };
 
+//////////
+
 /**
  * @param {object} card
  * @param {number} x
@@ -369,6 +405,8 @@ Solitaire.moveCard = function(card, x, y) {
 	}
 };
 
+//////////
+
 /**
  * @param {Event} e
  */
@@ -376,6 +414,7 @@ Solitaire.handleTouchmove = function(e) {
 	e.preventDefault();
 
 	var pos = getTouchPos(e);
+	var relPos = getRelativePos(pos, this.ctx.canvas);
 
 	if (this.oldPos == null) {
 		e.movementX = 0;
@@ -384,13 +423,20 @@ Solitaire.handleTouchmove = function(e) {
 	else {
 		e.movementX = pos.x - this.oldPos.x;
 		e.movementY = pos.y - this.oldPos.y;
-
-		// console.log(e.movementX);
 	}
 
 	this.oldPos = pos;
 
-	this.handleMove(e, pos);
+	if (objHovered(this.buttonsPos, relPos)) {
+		// console.log("menu");
+
+		Layouter.handleMousemove.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
+	}
+	else {
+		// console.log("not menu");
+
+		this.handleMove(e, pos);
+	}
 };
 
 /**
@@ -400,17 +446,28 @@ Solitaire.handleMousemove = function(e) {
 	// console.log("handleMousemove");
 
 	var pos = getMousePos(e);
+	var relPos = getRelativePos(pos, this.ctx.canvas);
 
-	this.handleMove(e, pos);
+	if (objHovered(this.buttonsPos, relPos)) {
+		// console.log("menu");
+
+		Layouter.handleMousemove.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
+	}
+	else {
+		// console.log("not menu");
+
+		this.handleMove(e, pos);
+	}
 };
 
 Solitaire.prototype.handleMove = function(e, pos) {
 	var mousePos = getRelativePos(pos, this.ctx.canvas);
 
+	// If hovering over turn pile and not holding card
 	if (this.heldCard == null && (this.turnPile.length > 0 || this.turnedPile.length > 0)) {
-		var topTurnPileCard = this.turnPilePos;
+		if (objHovered(this.turnPilePos, mousePos)) {
+			// console.log("on turn pile");
 
-		if (objHovered(topTurnPileCard, mousePos)) {
 			setPointer('pointer');
 
 			return;
@@ -419,10 +476,12 @@ Solitaire.prototype.handleMove = function(e, pos) {
 
 	this.hoverPos = this.getHoverPos(mousePos);
 
-	if (this.hoverPos != null && this.hoverPos.onTurnedPile && this.heldCard != null) {
+	// If holding card over turned pile
+	if (this.hoverPos != null && this.hoverPos.location == 'TURNED_PILE' && this.heldCard != null) {
 		this.hoverPos = null;
 	}
 
+	// Move held cards
 	if (this.heldCard != null) {
 		var dx = e.movementX / this.ctx.canvas.height;
 		var dy = e.movementY / this.ctx.canvas.height;
@@ -444,21 +503,13 @@ Solitaire.prototype.handleMove = function(e, pos) {
 Solitaire.handleTouchstart = function(e) {
 	e.preventDefault();
 
-	// console.log("handleTouchstart");
-
 	var pos = getTouchPos(e);
 	var relPos = getRelativePos(pos, this.ctx.canvas);
 
 	this.oldPos = pos;
 
-	// console.log("this.buttonsPos:", this.buttonsPos);
-	// console.log("relPos:", relPos);
-
 	if (objHovered(this.buttonsPos, relPos)) {
 		// console.log("menu");
-
-		// e.pageX = pos.x;
-		// e.pageY = pos.y;
 
 		Layouter.handleMousedown.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
@@ -467,8 +518,6 @@ Solitaire.handleTouchstart = function(e) {
 
 		this.handleDown(pos);
 	}
-
-	// this.handleDown(pos);
 };
 
 /**
@@ -476,8 +525,18 @@ Solitaire.handleTouchstart = function(e) {
  */
 Solitaire.handleMousedown = function(e) {
 	var pos = getMousePos(e);
+	var relPos = getRelativePos(pos, this.ctx.canvas);
 
-	this.handleDown(pos);
+	if (objHovered(this.buttonsPos, relPos)) {
+		// console.log("menu");
+
+		Layouter.handleMousedown.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
+	}
+	else {
+		// console.log("not menu");
+
+		this.handleDown(pos);
+	}
 };
 
 /**
@@ -487,35 +546,33 @@ Solitaire.prototype.handleDown = function(pos) {
 	var mousePos = getRelativePos(pos, this.ctx.canvas);
 
 	if (this.turnPile.length > 0 || this.turnedPile.length > 0) {
-		var topTurnPileCard = this.turnPile[this.turnPile.length - 1] || this.turnPilePos;
-
-		if (objHovered(topTurnPileCard, mousePos)) {
+		if (objHovered(this.turnPilePos, mousePos)) {
 			if (this.turnPile.length > 0) {
 				this.turnCard();
-
-				if (this.turnPile.length > 0) {
-					setPointer('pointer');
-				}
-				else {
-					setPointer('');
-				}
-
-				return;
 			}
 			else {
 				this.resetTurnPile();
 			}
+
+			if (this.turnPile.length > 0 || this.turnedPile.length > 0) {
+				setPointer('pointer');
+			}
+			else {
+				setPointer('');
+			}
+
+			this.hoverPos = null;
+
+			return;
 		}
-	}
 
-	if (this.turnedPile.length > 0) {
 		if (objHovered(this.turnedPilePos, mousePos) && this.heldCard == null) {
-			this.heldCard = this.turnedPile[this.turnedPile.length - 1];
+			this.heldCard = this.turnedPile.pop();
 
-			this.heldCard.onTurnedPile = false;
+			this.heldCard.location = 'HELD';
 			this.heldCard.fromTurnedPile = true;
 
-			this.turnedPile.pop();
+			this.hoverPos = null;
 
 			setPointer('pointer');
 
@@ -528,8 +585,10 @@ Solitaire.prototype.handleDown = function(pos) {
 	if (this.heldCard == null && hoverPos != null) {
 		this.heldCard = hoverPos;
 
-		this.removeCardFromPile(this.heldCard.pile, this.heldCard);
+		// Will always be from pile if this reached
+		this.removeCardFromPile(this.heldCard);
 
+		// Re-get it
 		this.hoverPos = this.getHoverPos(mousePos);
 	}
 	else {
@@ -568,8 +627,14 @@ Solitaire.handleTouchend = function(e) {
  */
 Solitaire.handleMouseup = function(e) {
 	var pos = getMousePos(e);
+	var relPos = getRelativePos(pos, this.ctx.canvas);
 
-	this.handleUp(pos);
+	if (objHovered(this.buttonsPos, relPos)) {
+		Layouter.handleMouseup.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
+	}
+	else {
+		this.handleUp(pos);
+	}
 };
 
 /**
@@ -581,9 +646,7 @@ Solitaire.prototype.handleUp = function(pos) {
 	var mousePos = getRelativePos(pos, this.ctx.canvas);
 
 	if (this.heldCard == null && (this.turnPile.length > 0 || this.turnedPile.length > 0)) {
-		var topTurnPileCard = this.turnPile[this.turnPile.length - 1] || this.turnPilePos;
-
-		if (objHovered(topTurnPileCard, mousePos)) {
+		if (objHovered(this.turnPilePos, mousePos) || objHovered(this.turnedPilePos, mousePos)) {
 			setPointer('pointer');
 
 			return;
@@ -592,119 +655,66 @@ Solitaire.prototype.handleUp = function(pos) {
 
 	this.hoverPos = this.getHoverPos(mousePos);
 
-	if (this.heldCard != null && this.heldCard.fromTurnedPile) {
+	if (this.heldCard != null) {
 		// console.log("this.hoverPos:", this.hoverPos, "this.heldCard:", this.heldCard);
 
 		if (Solitaire.canPutOn(this.hoverPos, this.heldCard)) {
 			// console.log("canPutOn", "this.hoverPos:", this.hoverPos, "this.heldCard:", this.heldCard);
 
-			if (this.hoverPos.onFoundation || this.hoverPos.isFoundationBase) {
+			if (this.hoverPos.location == 'FOUNDATION' || this.hoverPos.type == 'FOUNDATION') {
 				var foundation = this.foundations[this.hoverPos.foundation];
 
 				this.heldCard.x = this.hoverPos.x;
 				this.heldCard.y = this.hoverPos.y;
 				this.heldCard.foundation = this.hoverPos.foundation;
-				this.heldCard.onFoundation = true;
+				this.heldCard.location = 'FOUNDATION';
 
 				foundation.push(this.heldCard);
 			}
 			else {
 				this.addCardToPile(this.hoverPos.pile, this.heldCard);
-
-				this.heldCard.pile = this.hoverPos.pile;
-
-				this.updatePileCardPositions();
 			}
 
-			this.heldCard.fromTurnedPile = false;
-			this.heldCard.onTurnedPile = false;
-		}
-		else {
-			this.turnedPile.push(this.heldCard);
-
-			this.heldCard.onTurnedPile = true;
-			this.heldCard.fromTurnedPile = false;
-
-			this.heldCard.x = this.turnedPilePos.x;
-			this.heldCard.y = this.turnedPilePos.y;
-		}
-
-		this.heldCard = null;
-
-		this.hoverPos = this.getHoverPos(mousePos);
-
-		if (this.hoverPos != null) {
-			setPointer('pointer');
-		}
-		else {
-			setPointer('');
-		}
-
-		return;
-	}
-
-	if (this.hoverPos != null && (this.hoverPos.isFoundationBase || this.hoverPos.onFoundation)) {
-		if (this.heldCard != null) {
-			var foundation = this.foundations[this.hoverPos.foundation];
-
-			var parent;
-
-			if (foundation.length == 0) {
-				parent = this.hoverPos;
-			}
-			else {
-				parent = foundation[foundation.length - 1];
-			}
-
-			var canPutOn = Solitaire.canPutOn(parent, this.heldCard);
-
-			// console.log("canPutOn:", canPutOn, "this.hoverPos:", this.hoverPos, "this.heldCard:", this.heldCard);
-
-			if (canPutOn) {
-				this.heldCard.x = this.hoverPos.x;
-				this.heldCard.y = this.hoverPos.y;
-				this.heldCard.foundation = this.hoverPos.foundation;
-				this.heldCard.onFoundation = true;
-
-				foundation.push(this.heldCard);
-
-				var pile = this.piles[this.heldCard.pile];
+			// Flip the card under where the held card came from
+			if (typeof this.heldCard.fromPile == 'number') {
+				var pile = this.piles[this.heldCard.fromPile];
 
 				if (pile.length > 0) {
 					pile[pile.length - 1].facedown = false;
 				}
+			}
 
-				this.heldCard = null;
+			this.heldCard.fromTurnedPile = false;
+		}
+		else {// Return card
+			// console.log("Return card:", this.heldCard);
 
-				return;
+			if (this.heldCard.fromTurnedPile) {
+				this.turnedPile.push(this.heldCard);
+
+				this.heldCard.location = 'TURNED_PILE';
+				this.heldCard.fromTurnedPile = false;
+
+				this.heldCard.x = this.turnedPilePos.x;
+				this.heldCard.y = this.turnedPilePos.y;
+			}
+			else {// From a pile
+				var pileNum = this.heldCard.fromPile;
+
+				this.addCardToPile(pileNum, this.heldCard);
 			}
 		}
 	}
 
-	if (this.hoverPos != null && this.heldCard != null && Solitaire.canPutOn(this.hoverPos, this.heldCard)) {
-		var oldPileNum = this.heldCard.pile;
+	// Held card is null
 
-		this.addCardToPile(this.hoverPos.pile, this.heldCard);
-
-		var pile = this.piles[oldPileNum];
-
-		if (pile.length > 0) {
-			pile[pile.length - 1].facedown = false;
-		}
-
-		this.heldCard.pile = this.hoverPos.pile;
-	}
-	else if (this.heldCard != null) {
-		this.addCardToPile(this.heldCard.pile, this.heldCard);
-	}
+	this.updatePileCardPositions();
 
 	this.heldCard = null;
 
 	this.hoverPos = this.getHoverPos(mousePos);
 
-	this.updatePileCardPositions();
-
-	if (this.heldCard != null || this.hoverPos != null) {
+	if (this.hoverPos != null) {
 		setPointer('pointer');
 	}
 	else {
@@ -733,7 +743,7 @@ Solitaire.prototype.turnCard = function() {
 		var newCard = this.turnPile.pop();
 
 		newCard.facedown = false;
-		newCard.onTurnedPile = true;
+		newCard.location = 'TURNED_PILE';
 		newCard.x = this.horizMargin + this.cardWidth + this.horizSpace;
 		newCard.y = this.horizSpace;
 
@@ -753,16 +763,16 @@ Solitaire.canPutOn = function(parentCard, childCard) {
 		return false;
 	}
 
-	if (parentCard.isPileBase && childCard.rank == 12) {
+	if (parentCard.type == 'PILE' && childCard.rank == 12) {
 		return true;
 	}
 
-	if (parentCard.isFoundationBase && childCard.rank == 0) {
+	if (parentCard.type == 'FOUNDATION' && childCard.rank == 0) {
 		return true;
 	}
 
 	// Since counting up on foundations
-	if (parentCard.onFoundation && childCard.rank == parentCard.rank + 1 && childCard.suit == parentCard.suit) {
+	if (parentCard.location == 'FOUNDATION' && childCard.rank == parentCard.rank + 1 && childCard.suit == parentCard.suit) {
 		return true;
 	}
 
@@ -790,6 +800,7 @@ Solitaire.prototype.addCardToPile = function(pileNum, card) {
 		}
 
 		card.pile = pileNum;
+		card.location = 'PILE';
 
 		pile.push(card);
 
@@ -801,9 +812,9 @@ Solitaire.prototype.addCardToPile = function(pileNum, card) {
  * @param {number} pileNum
  * @param {object} card
  */
-Solitaire.prototype.removeCardFromPile = function(pileNum, card) {
-	if (card != null) {
-		var pile = this.piles[pileNum];
+Solitaire.prototype.removeCardFromPile = function(card) {
+	if (card != null && card.pile < this.piles.length) {
+		var pile = this.piles[card.pile];
 
 		var removeIndex = pile.indexOf(card);
 
@@ -815,7 +826,10 @@ Solitaire.prototype.removeCardFromPile = function(pileNum, card) {
 			}
 		}
 
-		this.removeCardFromPile(pileNum, card.next);
+		card.fromPile = card.pile;
+		card.pile = null;
+
+		this.removeCardFromPile(card.next);
 	}
 };
 
@@ -824,8 +838,6 @@ Solitaire.prototype.removeCardFromPile = function(pileNum, card) {
  * @returns {object|null}
  */
 Solitaire.prototype.getHoverPos = function(mousePos) {
-	// console.log("updateHoverPos", "mousePos:", mousePos, "this.hoverPos:", this.hoverPos);
-
 	if (objHovered(this.turnedPilePos, mousePos)) {
 		if (this.turnedPile.length > 0) {
 			var topTurnedCard = this.turnedPile[this.turnedPile.length - 1];
@@ -882,6 +894,8 @@ Solitaire.prototype.getHoverPos = function(mousePos) {
 
 	return null;
 };
+
+//////////
 
 Solitaire.prototype.drawHoverPos = function() {
 	if (this.hoverPos != null) {
@@ -969,16 +983,6 @@ Solitaire.prototype.drawFoundations = function() {
 
 			this.drawFaceupCard(card);
 		}
-	}
-};
-
-Solitaire.prototype.updateTurnPileCards = function() {
-	for (var c = 0; c < this.turnPile.length; c += 1) {
-		var card = this.turnPile[c];
-
-		card.facedown = true;
-		card.x = this.horizMargin;
-		card.y = this.horizSpace;
 	}
 };
 
@@ -1082,16 +1086,13 @@ Solitaire.prototype.drawFaceupCard = function(card) {
 
 			this.ctx.scale(fontScale, fontScale);
 
-			this.font.drawString(this.ctx, Solitaire.ranks[card.rank]);
+			this.font.drawString(this.ctx, Solitaire.RANKS[card.rank]);
 		this.ctx.restore();
 
 		this.ctx.translate(
-			this.font.size.x / this.font.size.y * this.fontHeight * (String(Solitaire.ranks[card.rank]).length + 1) * this.ctx.canvas.height,
+			this.font.size.x / this.font.size.y * this.fontHeight * (String(Solitaire.RANKS[card.rank]).length + 1) * this.ctx.canvas.height,
 			0
 		);
-
-		// console.log("this.suitSpriter.size.y:", this.suitSpriter.size.y, "this.font.size.y:", this.font.size.y);
-		// console.log("this.font.size:", this.font.size, "this.suitSpriter.size:", this.suitSpriter.size);
 
 		// Magic number because images not same height for some reason
 		var suitScale = this.ctx.canvas.height * this.fontHeight / (this.suitSpriter.size.y + 7);
@@ -1101,33 +1102,21 @@ Solitaire.prototype.drawFaceupCard = function(card) {
 		this.ctx.scale(suitScale, suitScale);
 
 		setImageSmoothing(this.ctx, false);
-		this.suitSpriter.drawSprite(this.ctx, Solitaire.suits[card.suit]);
+		this.suitSpriter.drawSprite(this.ctx, Solitaire.SUITS[card.suit]);
 
 	this.ctx.restore();
 };
 
-/**
- * @returns {object[]}
- */
-Solitaire.prototype.getPileBasePos = function() {
-	var pos = [];
+//////////
 
-	for (var p = 0; p < this.piles.length; p += 1) {
-		var card = {};
+Solitaire.prototype.updateTurnPileCards = function() {
+	for (var c = 0; c < this.turnPile.length; c += 1) {
+		var card = this.turnPile[c];
 
-		card.y = this.pilesY;
-		card.x = this.horizMargin + p * (this.cardWidth + this.horizSpace);
-
-		card.width = this.cardWidth;
-		card.height = this.cardHeight;
-
-		card.pile = p;
-		card.isPileBase = true;
-
-		pos.push(card);
+		card.facedown = true;
+		card.x = this.turnPilePos.x;
+		card.y = this.turnPilePos.y;
 	}
-
-	return pos;
 };
 
 Solitaire.prototype.updatePileCardPositions = function() {
@@ -1181,20 +1170,24 @@ Solitaire.getNewPiles = function(deck) {
 	return piles;
 };
 
+//////////
+
 /**
  * @returns {object[]}
  */
 Solitaire.prototype.getSortedDeck = function() {
 	var deck = [];
 
-	for (var s = 0; s < Solitaire.suits.length; s += 1) {
-		for (var r = 0; r < Solitaire.ranks.length; r += 1) {
+	for (var s = 0; s < Solitaire.SUITS.length; s += 1) {
+		for (var r = 0; r < Solitaire.RANKS.length; r += 1) {
 			deck.push({
 				rank: r,
 				suit: s,
 				width: this.cardWidth,
 				height: this.cardHeight,
-				next: null// Faceup card on top of it if this is faceup in a pile
+				next: null,// Faceup card on top of it if this is faceup in a pile
+				type: 'CARD',
+				location: null
 			});
 		}
 	}
@@ -1224,8 +1217,5 @@ Solitaire.prototype.getShuffledDeck = function() {
 
 	return shuffled;
 };
-
-Solitaire.ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-Solitaire.suits = ["clubs", "diamonds", "spades", "hearts"];
 
 export default Solitaire
