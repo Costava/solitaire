@@ -428,13 +428,9 @@ Solitaire.handleTouchmove = function(e) {
 	this.oldPos = pos;
 
 	if (objHovered(this.buttonsPos, relPos)) {
-		// console.log("menu");
-
 		Layouter.handleMousemove.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
 	else {
-		// console.log("not menu");
-
 		this.handleMove(e, pos);
 	}
 };
@@ -449,13 +445,9 @@ Solitaire.handleMousemove = function(e) {
 	var relPos = getRelativePos(pos, this.ctx.canvas);
 
 	if (objHovered(this.buttonsPos, relPos)) {
-		// console.log("menu");
-
 		Layouter.handleMousemove.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
 	else {
-		// console.log("not menu");
-
 		this.handleMove(e, pos);
 	}
 };
@@ -466,8 +458,6 @@ Solitaire.prototype.handleMove = function(e, pos) {
 	// If hovering over turn pile and not holding card
 	if (this.heldCard == null && (this.turnPile.length > 0 || this.turnedPile.length > 0)) {
 		if (objHovered(this.turnPilePos, mousePos)) {
-			// console.log("on turn pile");
-
 			setPointer('pointer');
 
 			return;
@@ -509,13 +499,9 @@ Solitaire.handleTouchstart = function(e) {
 	this.oldPos = pos;
 
 	if (objHovered(this.buttonsPos, relPos)) {
-		// console.log("menu");
-
 		Layouter.handleMousedown.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
 	else {
-		// console.log("not menu");
-
 		this.handleDown(pos);
 	}
 };
@@ -528,13 +514,9 @@ Solitaire.handleMousedown = function(e) {
 	var relPos = getRelativePos(pos, this.ctx.canvas);
 
 	if (objHovered(this.buttonsPos, relPos)) {
-		// console.log("menu");
-
 		Layouter.handleMousedown.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
 	else {
-		// console.log("not menu");
-
 		this.handleDown(pos);
 	}
 };
@@ -687,8 +669,6 @@ Solitaire.prototype.handleUp = function(pos) {
 			this.heldCard.fromTurnedPile = false;
 		}
 		else {// Return card
-			// console.log("Return card:", this.heldCard);
-
 			if (this.heldCard.fromTurnedPile) {
 				this.turnedPile.push(this.heldCard);
 
