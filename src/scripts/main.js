@@ -137,6 +137,8 @@ new ImageLoader(ImageURIs, function(images) {
 								}
 							});
 
+							game.newGame();
+
 							ctx.clearRect(0, 0, can.width, can.height);
 
 							game.start();
@@ -171,7 +173,7 @@ new ImageLoader(ImageURIs, function(images) {
 				top: 0,
 				bottom: 0.08,
 				type: 'subtitle',
-				text: "Version 0.0.2",
+				text: "Version 0.1.0",
 			},
 			{
 				top: 0,

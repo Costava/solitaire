@@ -1,6 +1,7 @@
 import DualLooper from './DualLooper';
 import ListenerSystem from './ListenerSystem';
 import setPointer from './setPointer';
+import getMousePos from './getMousePos';
 import getRelativePos from './getRelativePos';
 import objHovered from './objHovered';
 
@@ -224,19 +225,19 @@ Layouter.prototype.disarm = function() {
 };
 
 Layouter.handleMousemove = function(e) {
-	var mousePos = getRelativePos(e, this.options.parent);
+	var mousePos = getRelativePos(getMousePos(e), this.options.parent);
 
 	this.updateButtonStates(mousePos);
 };
 
 Layouter.handleMousedown = function(e) {
-	var mousePos = getRelativePos(e, this.options.parent);
+	var mousePos = getRelativePos(getMousePos(e), this.options.parent);
 
 	this.updateButtonStates(mousePos);
 };
 
 Layouter.handleMouseup = function(e) {
-	var mousePos = getRelativePos(e, this.options.parent);
+	var mousePos = getRelativePos(getMousePos(e), this.options.parent);
 
 	this.updateButtonStates(mousePos);
 

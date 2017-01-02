@@ -1,10 +1,14 @@
 /**
- * Get position of event e relative to element
+ * Get pos relative to element
+ * @param {object} pos
+ * @property {number} pos.x
+ * @property {number} pos.y
+ * @param {HTML element} element
  * @returns {object}
  */
-export default function(e, element) {
+export default function(pos, element) {
 	return {
-		x: (e.pageX - element.offsetLeft) / element.offsetHeight,
-		y: (e.pageY - element.offsetTop) / element.offsetHeight
+		x: (pos.x - element.offsetLeft) / element.offsetHeight,
+		y: (pos.y - element.offsetTop) / element.offsetHeight
 	};
 };
