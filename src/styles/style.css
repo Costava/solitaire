@@ -18,6 +18,8 @@ html, body {
 body {
 	overflow: hidden;
 	background-color: #000;
+
+	background-color: #61ad4a;
 }
 
 /* ////////// */
@@ -37,6 +39,4 @@ body {
 	margin: 0;
 	border: 0;
 	padding: 0;
-
-	background-color: #61ad4a;
 }

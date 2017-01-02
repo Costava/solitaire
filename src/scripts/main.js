@@ -173,7 +173,7 @@ new ImageLoader(ImageURIs, function(images) {
 				top: 0,
 				bottom: 0.08,
 				type: 'subtitle',
-				text: "Version 0.1.0",
+				text: "Version 0.1.1",
 			},
 			{
 				top: 0,
