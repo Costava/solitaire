@@ -125,3 +125,62 @@ if (jsOptionIndex != -1) {
 fse.outputFileSync(outputLocation, html);
 
 console.log(`HTML file with embeds output to ${outputLocation}`);
+
+//error in your code are mentioned here solving would be necessary
+js: "main.js", line 37: illegal character
+js:     console.log(`Error: Input file is not HTML: ${htmlFilePath}`);
+js: .............^
+js: "main.js", line 37: missing ) after argument list
+js:     console.log(`Error: Input file is not HTML: ${htmlFilePath}`);
+js: ...................^
+js: "main.js", line 37: illegal character
+js:     console.log(`Error: Input file is not HTML: ${htmlFilePath}`);
+js: ............................................................^
+js: "main.js", line 37: syntax error
+js:     console.log(`Error: Input file is not HTML: ${htmlFilePath}`);
+js: .............................................................^
+js: "main.js", line 39: invalid return
+js:     return 1;
+js: .......^
+js: "main.js", line 63: illegal character
+js:                     console.log(`WARNING: File may not be CSS: ${current}`);
+js: ...............^
+js: "main.js", line 63: missing ) after argument list
+js:                     console.log(`WARNING: File may not be CSS: ${current}`);
+js: .......................^
+js: "main.js", line 63: illegal character
+js:                     console.log(`WARNING: File may not be CSS: ${current}`);
+js: ........................................................^
+js: "main.js", line 63: syntax error
+js:                     console.log(`WARNING: File may not be CSS: ${current}`);
+js: .........................................................^
+js: "main.js", line 75: illegal character
+js:             console.log(`Embedding ${current} in ${inputHTMLFilePath}`);
+js: ..............^
+js: "main.js", line 75: missing ) after argument list
+js:             console.log(`Embedding ${current} in ${inputHTMLFilePath}`);
+js: ........................^
+js: "main.js", line 75: illegal character
+js:             console.log(`Embedding ${current} in ${inputHTMLFilePath}`);
+js: ...........................................................^
+js: "main.js", line 75: syntax error
+js:             console.log(`Embedding ${current} in ${inputHTMLFilePath}`);
+js: ............................................................^
+js: "main.js", line 81: illegal character
+js:                     `$1\t<style>\n${css}\n$1\t</style>\n$1</head>`
+js: ...^
+js: "main.js", line 81: illegal character
+js:                     `$1\t<style>\n${css}\n$1\t</style>\n$1</head>`
+js: .......^
+js: "main.js", line 81: missing ) after argument list
+js:                     `$1\t<style>\n${css}\n$1\t</style>\n$1</head>`
+js: .......^
+js: "main.js", line 81: illegal character
+js:                     `$1\t<style>\n${css}\n$1\t</style>\n$1</head>`
+js: ......................................^
+js: "main.js", line 81: missing } in compound statement
+js:                     `$1\t<style>\n${css}\n$1\t</style>\n$1</head>`
+js: ......................................^
+js: "main.js", line 81: unterminated regular expression literal
+js:                     `$1\t<style>\n${css}\n$1\t</style>\n$1</head>`
+js: ................................................^                                                   
