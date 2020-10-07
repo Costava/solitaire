@@ -6,7 +6,7 @@
 
 var webpack = require('webpack');
 var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-__dirname
+
 ////////// Config
 
 var entry = './src/scripts/main.js';
