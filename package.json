@@ -21,7 +21,7 @@
     "datauri": "1.0.5",
     "fs-extra": "1.0.0",
     "html-minifier": "3.2.3",
-    "mkdirp": "^1.0.4",
+    "mkdirp": "1.0.4",
     "postcss": "5.2.8",
     "postcss-advanced-variables": "1.2.2",
     "webpack": "1.14.0"
