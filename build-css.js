@@ -34,7 +34,7 @@ function handleCSS(outputLocation, plugins) {
 	.then(function(css) {
 		var processor = postcss(plugins);
 
-		return processor.process(css);
+		return processor.process(css, { from: undefined });
 	})
 	.then(function(result) {
 		return new Promise(function(resolve, reject) {

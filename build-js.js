@@ -5,25 +5,25 @@
  */
 
 var webpack = require('webpack');
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 ////////// Config
 
 var entry = './src/scripts/main.js';
 
 var output = {
-	path: './prep',
+	path: __dirname + '/prep',
 	filename: 'bundle.js'
 };
 
 var plugins = null;
 
 var outputMin = {
-	path: './prep',
+	path: __dirname + '/prep',
 	filename: 'bundle.min.js'
 };
 
 var pluginsMin = [
-	new webpack.optimize.UglifyJsPlugin(),
 	new webpack.optimize.OccurrenceOrderPlugin()
 ]
 
@@ -32,12 +32,12 @@ var pluginsMin = [
 var minify = process.argv.indexOf('-p') != -1;
 
 var webpackConfigModule = {
-	loaders: [
+	rules: [
 		{
 			test: /\.js$/,
 			loader: 'babel-loader',
 			query: {
-				presets: ['es2015']
+				presets: ['@babel/preset-env']
 			}
 		}
 	]
@@ -46,8 +46,14 @@ var webpackConfigModule = {
 function handleJS(entry, output, plugins) {
 	var config = {
 		entry: entry,
+		mode: 'production',
 		output: output,
-		module: webpackConfigModule
+		module: webpackConfigModule,
+		optimization: {
+			minimizer: [
+				new UglifyJsPlugin()
+			]
+		}
 	};
 
 	if (plugins instanceof Array) {

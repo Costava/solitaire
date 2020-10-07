@@ -14,16 +14,18 @@
     "webpack": "webpack ./src/scripts/main.js ./prep/bundle.js"
   },
   "devDependencies": {
-    "babel-core": "6.21.0",
-    "babel-loader": "6.2.10",
-    "babel-preset-es2015": "6.18.0",
-    "cssnano": "3.9.1",
-    "datauri": "1.0.5",
-    "fs-extra": "1.0.0",
-    "html-minifier": "3.2.3",
+    "@babel/core": "7.11.6",
+    "@babel/preset-env": "7.11.5",
+    "babel-core": "6.26.3",
+    "babel-loader": "8.1.0",
+    "cssnano": "4.1.10",
+    "datauri": "3.0.0",
+    "fs-extra": "9.0.1",
+    "html-minifier": "4.0.0",
     "mkdirp": "1.0.4",
-    "postcss": "5.2.8",
-    "postcss-advanced-variables": "1.2.2",
-    "webpack": "1.14.0"
+    "postcss": "8.1.1",
+    "postcss-advanced-variables": "3.0.1",
+    "uglifyjs-webpack-plugin": "2.2.0",
+    "webpack": "4.44.2"
   }
 }
