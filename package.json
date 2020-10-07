@@ -8,8 +8,8 @@
     "prep-dev": "node build-css.js & node build-js.js",
     "prep-production": "node build-css.js -p & node build-js.js -p",
     "empty-prep": "node empty-dir.js ./prep",
-    "build-dev": "npm run prep-dev && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.css --js ./prep/bundle.js",
-    "build-production": "npm run prep-production && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.min.css --js ./prep/bundle.min.js && node minify-dist.js",
+    "build-dev": "mkdirp ./prep && npm run prep-dev && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.css --js ./prep/bundle.js",
+    "build-production": "mkdirp ./prep && npm run prep-production && node embed.js ./src/index.html ./dist/index.html --css ./prep/final.min.css --js ./prep/bundle.min.js && node minify-dist.js",
     "start-server": "node server.js",
     "webpack": "webpack ./src/scripts/main.js ./prep/bundle.js"
   },
@@ -21,6 +21,7 @@
     "datauri": "1.0.5",
     "fs-extra": "1.0.0",
     "html-minifier": "3.2.3",
+    "mkdirp": "1.0.4",
     "postcss": "5.2.8",
     "postcss-advanced-variables": "1.2.2",
     "webpack": "1.14.0"
