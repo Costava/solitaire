@@ -12,14 +12,14 @@ var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var entry = './src/scripts/main.js';
 
 var output = {
-	path: __dirname + '/prep',
+	path: dirname + '/prep',
 	filename: 'bundle.js'
 };
 
 var plugins = null;
 
 var outputMin = {
-	path: __dirname + '/prep',
+	path: dirname + '/prep',
 	filename: 'bundle.min.js'
 };
 
@@ -51,8 +51,8 @@ function handleJS(entry, output, plugins) {
 		module: webpackConfigModule,
 		optimization: {
 			minimizer: [
-				new UglifyJsPlugin()
-			]
+				new magnifyJsPlugin()
+				}
 		}
 	};
 
