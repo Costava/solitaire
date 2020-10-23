@@ -430,9 +430,8 @@ Solitaire.handleTouchmove = function(e) {
 	if (objHovered(this.buttonsPos, relPos)) {
 		Layouter.handleMousemove.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
-	else {
-		this.handleMove(e, pos);
-	}
+
+	this.handleMove(e, pos);
 };
 
 /**
@@ -447,9 +446,8 @@ Solitaire.handleMousemove = function(e) {
 	if (objHovered(this.buttonsPos, relPos)) {
 		Layouter.handleMousemove.call(this.buttonsMenu, {pageX: pos.x, pageY: pos.y})
 	}
-	else {
-		this.handleMove(e, pos);
-	}
+
+	this.handleMove(e, pos);
 };
 
 Solitaire.prototype.handleMove = function(e, pos) {
